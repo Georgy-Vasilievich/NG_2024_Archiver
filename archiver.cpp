@@ -31,7 +31,21 @@ void Archiver::open()
 
 void Archiver::addFiles()
 {
+    QString fileName = QFileDialog::getOpenFileName(this, "Select file", "", "All files (*)");
 
+    if (fileName.isEmpty())
+        return;
+
+    QFile file;
+
+    file.setFileName(fileName);
+    if (file.open(QIODevice::ReadOnly)) {
+        QFileInfo fileInfo(fileName);
+        QString baseName(fileInfo.completeBaseName());
+        m_openedArchive->writeFile(baseName, file.readAll());
+        file.close();
+        updateFileList();
+    }
 }
 
 void Archiver::deleteFiles()
@@ -49,6 +63,7 @@ void Archiver::closeArchive()
     if (m_openedArchive != NULL) {
         m_openedArchive->close();
         delete m_openedArchive;
+        m_openedArchive = nullptr;
     }
 }
 
@@ -68,5 +83,20 @@ void Archiver::createOrOpen(bool create)
     m_openedArchive = new K7Zip(fileName);
 
     m_openedArchive->open(QIODevice::ReadWrite);
+
+    updateFileList();
+
+    ui->b_add->setEnabled(true);
+    ui->b_delete->setEnabled(true);
+    ui->b_extract->setEnabled(true);
+}
+
+void Archiver::updateFileList()
+{
+    ui->l_files->clear();
+    const KArchiveDirectory *root = m_openedArchive->directory();
+
+    for (QString entry : root->entries())
+        ui->l_files->addItem(entry);
 }
 

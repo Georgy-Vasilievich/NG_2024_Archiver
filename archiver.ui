@@ -37,6 +37,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QPushButton" name="b_add">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Add files</string>
         </property>
@@ -44,6 +47,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="b_delete">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Delete files</string>
         </property>
@@ -51,6 +57,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="b_extract">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Extract files</string>
         </property>

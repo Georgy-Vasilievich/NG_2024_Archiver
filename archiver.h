@@ -29,5 +29,6 @@ private:
     K7Zip* m_openedArchive = nullptr;
     void closeArchive();
     void createOrOpen(bool);
+    void updateFileList();
 };
 #endif // ARCHIVER_H
