@@ -3,6 +3,10 @@
 
 #include <QFileDialog>
 #include <QMainWindow>
+#include <QTemporaryDir>
+#include <karchive.h>
+#include <karchivefile.h>
+#include <karchivedirectory.h>
 #include <k7zip.h>
 
 QT_BEGIN_NAMESPACE
@@ -30,5 +34,6 @@ private:
     void closeArchive();
     void createOrOpen(bool);
     void updateFileList();
+    bool writeFile(QString);
 };
 #endif // ARCHIVER_H

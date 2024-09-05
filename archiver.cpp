@@ -36,26 +36,54 @@ void Archiver::addFiles()
     if (fileName.isEmpty())
         return;
 
-    QFile file;
+    writeFile(fileName);
 
-    file.setFileName(fileName);
-    if (file.open(QIODevice::ReadOnly)) {
-        QFileInfo fileInfo(fileName);
-        QString baseName(fileInfo.completeBaseName());
-        m_openedArchive->writeFile(baseName, file.readAll());
-        file.close();
-        updateFileList();
-    }
+    updateFileList();
 }
 
 void Archiver::deleteFiles()
 {
+    QTemporaryDir tempDir;
 
+    const KArchiveDirectory *oldRoot = m_openedArchive->directory();
+
+    oldRoot->copyTo(tempDir.path(), true);
+
+    QStringList entries = oldRoot->entries();
+
+    delete oldRoot;
+
+    K7Zip* newArchive = new K7Zip(m_openedArchive->fileName());
+    //closeArchive();
+    //delete m_openedArchive;
+    m_openedArchive = newArchive;
+    m_openedArchive->open(QIODevice::ReadWrite);
+
+    QList<QListWidgetItem*> selectedFiles = ui->l_files->selectedItems();
+
+    for (QString entry : entries) {
+        for (QListWidgetItem* item : selectedFiles) {
+            if (entry == item->text())
+                goto end;
+            QString filePath = QDir(tempDir.path()).filePath(entry);
+            if (!writeFile(filePath))
+                m_openedArchive->writeDir(filePath);
+        }
+
+end: continue;
+    }
+    updateFileList();
 }
 
 void Archiver::extractFiles()
 {
-
+    const KArchiveDirectory *root = m_openedArchive->directory();
+    QString destination = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                            "",
+                                                            QFileDialog::ShowDirsOnly
+                                                            | QFileDialog::DontResolveSymlinks);
+    bool recursive = true;
+    root->copyTo(destination, recursive);
 }
 
 void Archiver::closeArchive()
@@ -98,5 +126,20 @@ void Archiver::updateFileList()
 
     for (QString entry : root->entries())
         ui->l_files->addItem(entry);
+}
+
+bool Archiver::writeFile(QString fileName)
+{
+    bool error = false;
+    QFile file;
+
+    file.setFileName(fileName);
+    if (file.open(QIODevice::ReadOnly)) {
+        QFileInfo fileInfo(fileName);
+        QString baseName(fileInfo.completeBaseName());
+        error = m_openedArchive->writeFile(baseName, file.readAll());
+        file.close();
+    }
+    return error;
 }
 

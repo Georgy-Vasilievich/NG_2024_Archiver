@@ -61,14 +61,18 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Extract files</string>
+         <string>Extract all to...</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="l_files"/>
+     <widget class="QListWidget" name="l_files">
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
