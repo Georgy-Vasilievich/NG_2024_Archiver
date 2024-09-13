@@ -51,26 +51,33 @@ void Archiver::deleteFiles()
 
     QStringList entries = oldRoot->entries();
 
-    delete oldRoot;
+    QString fileName = m_openedArchive->fileName();
 
-    K7Zip* newArchive = new K7Zip(m_openedArchive->fileName());
-    //closeArchive();
-    //delete m_openedArchive;
-    m_openedArchive = newArchive;
+    closeArchive();
+
+    QFile::remove(fileName);
+
+    m_openedArchive = new K7Zip(fileName);
     m_openedArchive->open(QIODevice::ReadWrite);
 
     QList<QListWidgetItem*> selectedFiles = ui->l_files->selectedItems();
 
     for (QString entry : entries) {
+        bool match = false;
         for (QListWidgetItem* item : selectedFiles) {
-            if (entry == item->text())
-                goto end;
-            QString filePath = QDir(tempDir.path()).filePath(entry);
-            if (!writeFile(filePath))
-                m_openedArchive->writeDir(filePath);
+            if (entry == item->text()) {
+                match = true;
+                break;
+            }
         }
-
-end: continue;
+        if (match)
+            continue;
+        QString filePath = QDir(tempDir.path()).filePath(entry);
+        QFileInfo fi(filePath);
+        if (fi.isFile())
+            writeFile(filePath);
+        else
+            m_openedArchive->writeDir(filePath);
     }
     updateFileList();
 }
@@ -88,7 +95,7 @@ void Archiver::extractFiles()
 
 void Archiver::closeArchive()
 {
-    if (m_openedArchive != NULL) {
+    if (m_openedArchive != NULL && m_openedArchive->isOpen()) {
         m_openedArchive->close();
         delete m_openedArchive;
         m_openedArchive = nullptr;
@@ -128,18 +135,18 @@ void Archiver::updateFileList()
         ui->l_files->addItem(entry);
 }
 
-bool Archiver::writeFile(QString fileName)
+bool Archiver::writeFile(QString path)
 {
-    bool error = false;
+    bool status = false;
     QFile file;
 
-    file.setFileName(fileName);
+    file.setFileName(path);
     if (file.open(QIODevice::ReadOnly)) {
-        QFileInfo fileInfo(fileName);
-        QString baseName(fileInfo.completeBaseName());
-        error = m_openedArchive->writeFile(baseName, file.readAll());
+        QFileInfo fileInfo(path);
+        QString fileName(fileInfo.fileName());
+        status = m_openedArchive->writeFile(fileName, file.readAll());
         file.close();
     }
-    return error;
+    return status;
 }
 
