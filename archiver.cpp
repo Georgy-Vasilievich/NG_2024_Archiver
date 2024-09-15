@@ -31,18 +31,24 @@ void Archiver::open()
 
 void Archiver::addFiles()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Select file", "", "All files (*)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select file", "", "All files (*)");
 
-    if (fileName.isEmpty())
+    if (fileNames.isEmpty())
         return;
 
-    writeFile(fileName);
+    for (QString fileName : fileNames)
+        writeFile(fileName);
 
     updateFileList();
 }
 
 void Archiver::deleteFiles()
 {
+    QList<QListWidgetItem*> selectedFiles = ui->l_files->selectedItems();
+
+    if (selectedFiles.isEmpty())
+        return;
+
     QTemporaryDir tempDir;
 
     const KArchiveDirectory *oldRoot = m_openedArchive->directory();
@@ -59,8 +65,6 @@ void Archiver::deleteFiles()
 
     m_openedArchive = new K7Zip(fileName);
     m_openedArchive->open(QIODevice::ReadWrite);
-
-    QList<QListWidgetItem*> selectedFiles = ui->l_files->selectedItems();
 
     for (QString entry : entries) {
         bool match = false;
