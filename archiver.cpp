@@ -31,7 +31,7 @@ void Archiver::open()
 
 void Archiver::addFiles()
 {
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select file", "", "All files (*)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select files", "", "All files (*)");
 
     if (fileNames.isEmpty())
         return;

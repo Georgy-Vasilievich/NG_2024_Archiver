@@ -5,7 +5,6 @@
 #include <QMainWindow>
 #include <QTemporaryDir>
 #include <karchive.h>
-#include <karchivefile.h>
 #include <karchivedirectory.h>
 #include <k7zip.h>
 
